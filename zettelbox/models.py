@@ -10,6 +10,9 @@ class Box(models.Model):
     # who has the box?
     holder = models.CharField(max_length=200)
 
+    def __str__(self):
+        return self.name
+
 
 
 class Paper(models.Model):
@@ -18,3 +21,6 @@ class Paper(models.Model):
     content = models.TextField()
     # is it inside the box or outside?
     inside = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.content
