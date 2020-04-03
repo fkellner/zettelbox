@@ -1,1 +1,9 @@
-<h>Hello World!</h>
+<h1>Hallo und Willkommen im Land der Zettelboxen!</h1>
+
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+<form action="{% url 'zettelbox:create' %}" method="post">
+{% csrf_token %}
+<input type="text" name="name" id="name" placeholder="Neue_Zettelbox"><br>
+<input type="submit" value="Neue Box erstellen">
+</form>

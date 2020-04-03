@@ -1,0 +1,9 @@
+<h2>Sag deinen Mitspielern bitte noch, wie du heißt:</h2>
+
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+<form action="{% url 'zettelbox:taufe' %}" method="post">
+{% csrf_token %}
+<input type="text" name="name" id="name" placeholder="Anonymes Einhorn"><br>
+<input type="submit" value="Namen festlegen">
+</form>

@@ -2,13 +2,9 @@ from django.db import models
 
 # Create your models here.
 class Box(models.Model):
-    name = models.CharField(max_length=200)
-    # is somebody currently looking at a paper from the box?
-    open = models.BooleanField(default=False)
+    name = models.CharField(max_length=200, unique=True)
     # can you still add papers?
-    full = models.BooleanField(default=False)
-    # who has the box?
-    holder = models.CharField(max_length=200)
+    open = models.BooleanField(default=True)
 
     def __str__(self):
         return self.name
@@ -24,3 +20,9 @@ class Paper(models.Model):
 
     def __str__(self):
         return self.content
+
+class User(models.Model):
+    name = models.CharField(max_length=200)
+
+    def __str__(self):
+        return self.name
