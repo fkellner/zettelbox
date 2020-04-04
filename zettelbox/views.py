@@ -105,6 +105,9 @@ def addPaper(request, box_name):
     except ObjectDoesNotExist:
         return HttpResponseRedirect(reverse('zettelbox:index'))
 
+    if not box.open:
+        return HttpResponseRedirect('{:s}?message=Es dürfen keine Zettel mehr geschrieben werden!'.format(reverse('zettelbox:box', args=(box_name,))))
+
     content = request.POST['content']
     paper = Paper(box = box, content = content, holder = user)
     paper.save()
@@ -185,3 +188,37 @@ def forceInsertAll(request, box_name):
         paper.save()
 
     return HttpResponseRedirect('{:s}?message=Zettel von allen in die Box zurückgesaugt!'.format(reverse('zettelbox:box', args=(box_name,))))
+
+def close(request, box_name):
+    # standard boilerplate
+    try:
+        user = User.objects.get(pk=request.session.get('user_id'))
+    except ObjectDoesNotExist:
+        return HttpResponseRedirect(reverse('zettelbox:login'))
+
+    try:
+        box = Box.objects.get(name=box_name)
+    except ObjectDoesNotExist:
+        return HttpResponseRedirect(reverse('zettelbox:index'))
+
+    box.open = False
+    box.save()
+
+    return HttpResponseRedirect('{:s}?message=Ok, niemand darf mehr neue Zettel schreiben!'.format(reverse('zettelbox:box', args=(box_name,))))
+
+def open(request, box_name):
+    # standard boilerplate
+    try:
+        user = User.objects.get(pk=request.session.get('user_id'))
+    except ObjectDoesNotExist:
+        return HttpResponseRedirect(reverse('zettelbox:login'))
+
+    try:
+        box = Box.objects.get(name=box_name)
+    except ObjectDoesNotExist:
+        return HttpResponseRedirect(reverse('zettelbox:index'))
+
+    box.open = True
+    box.save()
+
+    return HttpResponseRedirect('{:s}?message=Man darf jetzt wieder Zettel schreiben!'.format(reverse('zettelbox:box', args=(box_name,))))

@@ -1,4 +1,10 @@
 <h1>{{ box.name }}</h1>
+{% if box.open %}
+<form action="{% url 'zettelbox:close' box.name %}" method="post">
+  {% csrf_token %}
+  <input type="submit" value="Keine neuen Zettel mehr zulassen">
+</form>
+{% endif %}
 
 {% if message %}<p><strong>{{ message }}</strong></p>{% endif %}
 
@@ -17,11 +23,13 @@
   </li>
 {% endfor %}
 </ul>
+{% if box.open %}
 <form action="{% url 'zettelbox:add_paper' box.name %}" method="post">
   {% csrf_token %}
   <input type="text" name="content" placeholder="Ein Wort">
   <input type="submit" value="Zettel hinzufügen">
 </form>
+{% endif %}
 
 <form action="{% url 'zettelbox:insert_all' box.name %}" method="post">
   {% csrf_token %}
@@ -33,6 +41,12 @@
   <input type="submit" value="Allen Mitspieler:innen die Zettel entreißen und zurück in die Box tun.">
 </form>
 
+{% if not box.open %}
+<form action="{% url 'zettelbox:open' box.name %}" method="post">
+  {% csrf_token %}
+  <input type="submit" value="Wieder neue Zettel zulassen">
+</form>
+{% endif %}
 
 <footer style="position:fixed;bottom:0;left:0;right:0;text-align:center">
   <form action="{% url 'zettelbox:rename' %}" method="post">
