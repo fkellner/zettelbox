@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.core.exceptions import ObjectDoesNotExist
 from django.urls import reverse
 from django.http import HttpResponseRedirect
-from .models import Box, User
+from .models import Box, User, Paper
 # Create your views here.
 def index(request):
     # standard boilerplate
@@ -44,10 +44,14 @@ def box(request, box_name):
 
     try:
         box = Box.objects.get(name=box_name)
+        context['box'] = box
     except ObjectDoesNotExist:
         return HttpResponseRedirect(reverse('zettelbox:index'))
 
-    context['box'] = box
+    context['papers'] = [ paper for paper in box.paper_set.filter(holder=user) ]
+
+    context['message'] = request.GET.get('message')
+
     return render(request, 'zettelbox/box.html', context)
 
 def login(request):
@@ -88,3 +92,96 @@ def rename(request):
     user.name = name
     user.save()
     return HttpResponseRedirect(source)
+
+def addPaper(request, box_name):
+    # standard boilerplate
+    try:
+        user = User.objects.get(pk=request.session.get('user_id'))
+    except ObjectDoesNotExist:
+        return HttpResponseRedirect(reverse('zettelbox:login'))
+
+    try:
+        box = Box.objects.get(name=box_name)
+    except ObjectDoesNotExist:
+        return HttpResponseRedirect(reverse('zettelbox:index'))
+
+    content = request.POST['content']
+    paper = Paper(box = box, content = content, holder = user)
+    paper.save()
+    return HttpResponseRedirect('{:s}?message=Zettel gespeichert!'.format(reverse('zettelbox:box', args=(box_name,))))
+
+def deletePaper(request, box_name, paper_id):
+    # standard boilerplate
+    try:
+        user = User.objects.get(pk=request.session.get('user_id'))
+    except ObjectDoesNotExist:
+        return HttpResponseRedirect(reverse('zettelbox:login'))
+
+    try:
+        box = Box.objects.get(name=box_name)
+    except ObjectDoesNotExist:
+        return HttpResponseRedirect(reverse('zettelbox:index'))
+
+    try:
+        paper = Paper.objects.get(pk=paper_id)
+        paper.delete()
+    except ObjectDoesNotExist:
+        pass
+
+    return HttpResponseRedirect('{:s}?message=Zettel vernichtet!'.format(reverse('zettelbox:box', args=(box_name,))))
+
+def insertPaper(request, box_name, paper_id):
+    # standard boilerplate
+    try:
+        user = User.objects.get(pk=request.session.get('user_id'))
+    except ObjectDoesNotExist:
+        return HttpResponseRedirect(reverse('zettelbox:login'))
+
+    try:
+        box = Box.objects.get(name=box_name)
+    except ObjectDoesNotExist:
+        return HttpResponseRedirect(reverse('zettelbox:index'))
+
+    try:
+        paper = Paper.objects.get(pk=paper_id)
+        paper.holder = None
+        paper.save()
+        return HttpResponseRedirect('{:s}?message=Zettel in die Box gelegt!'.format(reverse('zettelbox:box', args=(box_name,))))
+    except ObjectDoesNotExist:
+        return HttpResponseRedirect('{:s}?message=Zettel scheint verloren gegangen zu sein :/'.format(reverse('zettelbox:box', args=(box_name,))))
+
+def insertAll(request, box_name):
+    # standard boilerplate
+    try:
+        user = User.objects.get(pk=request.session.get('user_id'))
+    except ObjectDoesNotExist:
+        return HttpResponseRedirect(reverse('zettelbox:login'))
+
+    try:
+        box = Box.objects.get(name=box_name)
+    except ObjectDoesNotExist:
+        return HttpResponseRedirect(reverse('zettelbox:index'))
+
+    for paper in box.paper_set.filter(holder=user):
+        paper.holder = None
+        paper.save()
+
+    return HttpResponseRedirect('{:s}?message=Alle Zettel zurückgelegt!'.format(reverse('zettelbox:box', args=(box_name,))))
+
+def forceInsertAll(request, box_name):
+    # standard boilerplate
+    try:
+        user = User.objects.get(pk=request.session.get('user_id'))
+    except ObjectDoesNotExist:
+        return HttpResponseRedirect(reverse('zettelbox:login'))
+
+    try:
+        box = Box.objects.get(name=box_name)
+    except ObjectDoesNotExist:
+        return HttpResponseRedirect(reverse('zettelbox:index'))
+
+    for paper in box.paper_set.all():
+        paper.holder = None
+        paper.save()
+
+    return HttpResponseRedirect('{:s}?message=Zettel von allen in die Box zurückgesaugt!'.format(reverse('zettelbox:box', args=(box_name,))))

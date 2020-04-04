@@ -1,6 +1,38 @@
 <h1>{{ box.name }}</h1>
 
-{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+{% if message %}<p><strong>{{ message }}</strong></p>{% endif %}
+
+<ul>
+{% for paper in papers %}
+  <li>
+    <p>{{ paper.content }}</p>
+    <form action="{% url 'zettelbox:insert_paper' box.name paper.id %}" method="post">
+      {% csrf_token %}
+      <input type="submit" value="In die Box legen">
+    </form>
+    <form action="{% url 'zettelbox:delete_paper' box.name paper.id %}" method="post">
+      {% csrf_token %}
+      <input type="submit" value="Vernichten">
+    </form>
+  </li>
+{% endfor %}
+</ul>
+<form action="{% url 'zettelbox:add_paper' box.name %}" method="post">
+  {% csrf_token %}
+  <input type="text" name="content" placeholder="Ein Wort">
+  <input type="submit" value="Zettel hinzufügen">
+</form>
+
+<form action="{% url 'zettelbox:insert_all' box.name %}" method="post">
+  {% csrf_token %}
+  <input type="submit" value="Alle Zettel in die Box legen">
+</form>
+
+<form action="{% url 'zettelbox:force_insert_all' box.name %}" method="post">
+  {% csrf_token %}
+  <input type="submit" value="Allen Mitspieler:innen die Zettel entreißen und zurück in die Box tun.">
+</form>
+
 
 <footer style="position:fixed;bottom:0;left:0;right:0;text-align:center">
   <form action="{% url 'zettelbox:rename' %}" method="post">
