@@ -9,7 +9,11 @@ class Box(models.Model):
     def __str__(self):
         return self.name
 
+class User(models.Model):
+    name = models.CharField(max_length=200)
 
+    def __str__(self):
+        return self.name
 
 class Paper(models.Model):
     box = models.ForeignKey(Box, on_delete=models.CASCADE)
@@ -17,12 +21,8 @@ class Paper(models.Model):
     content = models.TextField()
     # is it inside the box or outside?
     inside = models.BooleanField(default=True)
+    # who currently has the paper open
+    holder = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL)
 
     def __str__(self):
         return self.content
-
-class User(models.Model):
-    name = models.CharField(max_length=200)
-
-    def __str__(self):
-        return self.name

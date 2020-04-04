@@ -8,5 +8,7 @@ urlpatterns = [
     path('create/', views.create, name='create'),
     path('box/<str:box_name>/', views.box, name='box'),
     path('login/', views.login, name='login'),
-    path('taufe/', views.taufe, name='taufe')
+    path('logout/', views.logout, name='logout'),
+    path('taufe/', views.taufe, name='taufe'),
+    path('rename/', views.rename, name='rename'),
 ]
