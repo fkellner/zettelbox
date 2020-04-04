@@ -1,11 +1,11 @@
 <h1>Hallo und Willkommen im Land der Zettelboxen!</h1>
 
-{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+{% if exists %}<p><strong>{{ exists }} existiert bereits <a href="{% url 'zettelbox:box' exists %}">hier</a></strong></p>{% endif %}
 
 <form action="{% url 'zettelbox:create' %}" method="post">
 {% csrf_token %}
-<input type="text" name="name" id="name" placeholder="Neue_Zettelbox"><br>
-<input type="submit" value="Neue Box erstellen">
+<input type="text" name="name" id="name" placeholder="Name der Zettelbox"><br>
+<input type="submit" value="Box Erstellen">
 </form>
 
 <footer style="position:fixed;bottom:0;left:0;right:0;text-align:center">
