@@ -50,6 +50,13 @@ def box(request, box_name):
         return HttpResponseRedirect(reverse('zettelbox:index'))
 
     context['papers'] = [ paper for paper in box.paper_set.filter(holder=user) ]
+    players = set()
+    for p in box.paper_set.all():
+        players.add(p.creator.name)
+
+    context['players'] = ', '.join(players)
+    context['paper_count_inside'] = box.paper_set.filter(holder=None).count()
+    context['paper_count'] = box.paper_set.count()
 
     context['message'] = request.GET.get('message')
 
@@ -110,7 +117,7 @@ def addPaper(request, box_name):
         return HttpResponseRedirect('{:s}?message=Es dürfen keine Zettel mehr geschrieben werden!'.format(reverse('zettelbox:box', args=(box_name,))))
 
     content = request.POST['content']
-    paper = Paper(box = box, content = content, holder = user)
+    paper = Paper(box = box, content = content, holder = user, creator = user)
     paper.save()
     return HttpResponseRedirect('{:s}?message=Zettel gespeichert!'.format(reverse('zettelbox:box', args=(box_name,))))
 

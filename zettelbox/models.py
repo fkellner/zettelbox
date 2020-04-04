@@ -21,6 +21,8 @@ class Paper(models.Model):
     content = models.TextField()
     # who currently has the paper open
     holder = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL)
+    # who created the paper
+    creator = models.ForeignKey(User, on_delete=models.CASCADE, related_name='creator_id')
 
     def __str__(self):
         return self.content

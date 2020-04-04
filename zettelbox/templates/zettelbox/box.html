@@ -1,4 +1,8 @@
 <h1>{{ box.name }}</h1>
+<p>Mit Zetteln von {{ players }}
+</p>
+<p>{{ paper_count_inside }}/{{ paper_count }} Zettel sind drin
+</p>
 {% if box.open %}
 <form action="{% url 'zettelbox:close' box.name %}" method="post">
   {% csrf_token %}
