@@ -19,8 +19,6 @@ class Paper(models.Model):
     box = models.ForeignKey(Box, on_delete=models.CASCADE)
     # text on paper
     content = models.TextField()
-    # is it inside the box or outside?
-    inside = models.BooleanField(default=True)
     # who currently has the paper open
     holder = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL)
 
