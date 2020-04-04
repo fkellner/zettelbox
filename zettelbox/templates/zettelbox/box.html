@@ -8,6 +8,10 @@
 
 {% if message %}<p><strong>{{ message }}</strong></p>{% endif %}
 
+<form action="{% url 'zettelbox:random' box.name %}" method="post">
+  {% csrf_token %}
+  <input type="submit" value="Zufälligen Zettel ziehen">
+</form>
 <ul>
 {% for paper in papers %}
   <li>
@@ -27,7 +31,7 @@
 <form action="{% url 'zettelbox:add_paper' box.name %}" method="post">
   {% csrf_token %}
   <input type="text" name="content" placeholder="Ein Wort">
-  <input type="submit" value="Zettel hinzufügen">
+  <input type="submit" value="Zettel speichern">
 </form>
 {% endif %}
 

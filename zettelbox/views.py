@@ -3,6 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from .models import Box, User, Paper
+import random
 # Create your views here.
 def index(request):
     # standard boilerplate
@@ -222,3 +223,26 @@ def open(request, box_name):
     box.save()
 
     return HttpResponseRedirect('{:s}?message=Man darf jetzt wieder Zettel schreiben!'.format(reverse('zettelbox:box', args=(box_name,))))
+
+def getRandom(request, box_name):
+    # standard boilerplate
+    try:
+        user = User.objects.get(pk=request.session.get('user_id'))
+    except ObjectDoesNotExist:
+        return HttpResponseRedirect(reverse('zettelbox:login'))
+
+    try:
+        box = Box.objects.get(name=box_name)
+    except ObjectDoesNotExist:
+        return HttpResponseRedirect(reverse('zettelbox:index'))
+
+    papers_in_box = box.paper_set.filter(holder=None)
+
+    if papers_in_box.count() < 1:
+        return HttpResponseRedirect('{:s}?message=Es liegen keine Zettel mehr in der Box!'.format(reverse('zettelbox:box', args=(box_name,))))
+
+    paper = random.choice(papers_in_box)
+    paper.holder = user
+    paper.save()
+
+    return HttpResponseRedirect(reverse('zettelbox:box', args=(box_name,)))
