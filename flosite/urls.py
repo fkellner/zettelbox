@@ -17,6 +17,9 @@ from django.contrib import admin
 from django.urls import include, path
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('zettelbox/', include('zettelbox.urls'))
+    path('/', include('zettelbox.urls')),
 ]
+# urlpatterns = [
+#     path('admin/', admin.site.urls),
+#     path('zettelbox/', include('zettelbox.urls'))
+# ]
