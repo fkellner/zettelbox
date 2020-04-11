@@ -27,7 +27,7 @@ SESSION_COOKIE_HTTPONLY = True
 SECRET_KEY = '_1b=4h8^%te3xjnzxkq!8m%x-oht-wt^f4-*avalnl_f%$^!dn'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False #True
+DEBUG = True #True
 
 ALLOWED_HOSTS = ['0.0.0.0']
 
