@@ -64,11 +64,14 @@ def box(request, box_name):
 
 def login(request):
     # standard boilerplate
+    redirectUrl = request.GET.get('redirect')
+    if redirectUrl == None:
+        redirectUrl = reverse('zettelbox:index')
     try:
         user = User.objects.get(pk=request.session.get('user_id'))
-        return HttpResponseRedirect(reverse('zettelbox:index'))
+        return HttpResponseRedirect(redirectUrl)
     except ObjectDoesNotExist:
-        context = {}
+        context = { 'redirect': redirectUrl }
         return render(request, 'zettelbox/login.html', context)
 
 def logout(request):
@@ -84,10 +87,11 @@ def logout(request):
 
 def taufe(request):
     name = request.POST['name']
+    redirect = request.POST['redirect']
     single_use_user = User(name=name)
     single_use_user.save()
     request.session['user_id'] = single_use_user.id
-    return HttpResponseRedirect(reverse('zettelbox:index'))
+    return HttpResponseRedirect(redirect)
 
 def rename(request):
     name = request.POST['username']
