@@ -41,7 +41,7 @@ def box(request, box_name):
         user = User.objects.get(pk=request.session.get('user_id'))
         context = { 'username': user.name }
     except ObjectDoesNotExist:
-        return HttpResponseRedirect(reverse('zettelbox:login'))
+        return HttpResponseRedirect('{:s}?redirect={:s}'.format(reverse('zettelbox:login'),reverse('zettelbox:box', args=(box_name,))))
 
     try:
         box = Box.objects.get(name=box_name)
