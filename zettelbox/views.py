@@ -4,153 +4,98 @@ from django.urls import reverse
 from django.http import HttpResponseRedirect
 from .models import Box, User, Paper
 import random
-# Create your views here.
+
+############# VIEWS ###############
+# Page for creating boxes
 def index(request):
     # standard boilerplate
     try:
         user = User.objects.get(pk=request.session.get('user_id'))
-        context = { 'username': user.name }
     except ObjectDoesNotExist:
-        return HttpResponseRedirect(reverse('zettelbox:login'))
+        single_use_user = User()
+        single_use_user.save()
+        request.session['user_id'] = single_use_user.id
 
-    context['exists'] = request.GET.get('exists')
+    return render(request, 'zettelbox/index.html', {})
 
-    return render(request, 'zettelbox/index.html', context)
+# show player interface or interface for adding papers
+def box(request, box_name):
+    # standard boilerplate
+    try:
+        user = User.objects.get(pk=request.session.get('user_id'))
+    except ObjectDoesNotExist:
+        single_use_user = User()
+        single_use_user.save()
+        request.session['user_id'] = single_use_user.id
 
+    try:
+        box = Box.objects.get(name=box_name)
+        context = { 'box': box }
+    except ObjectDoesNotExist:
+        return HttpResponseRedirect(reverse('zettelbox:index'))
+
+    if box.paper_set.filter(creator=user).count() > 0:
+
+        context['papers'] = [ paper for paper in box.paper_set.filter(holder=user).filter(current=False) ]
+        context['paper_count_inside'] = box.paper_set.filter(holder=None).count()
+        context['paper_count'] = box.paper_set.count()
+
+        for p in box.paper_set.filter(holder=user).filter(current=True):
+            context['current'] = p
+
+        return render(request, 'zettelbox/box.html', context)
+
+    else:
+        return render(request, 'zettelbox/signup.html', context)
+
+############ ACTIONS ################
+
+# create box or redirect if it exists
 def create(request):
     # standard boilerplate
     try:
         user = User.objects.get(pk=request.session.get('user_id'))
-        context = { 'username': user.name }
     except ObjectDoesNotExist:
-        return HttpResponseRedirect(reverse('zettelbox:login'))
+        return HttpResponseRedirect(reverse('zettelbox:box', args=(box_name,)))
 
     name = request.POST['name']
     try:
         existing_box = Box.objects.get(name=name)
-        exists = name
-        return HttpResponseRedirect('{:s}?exists={:s}'.format(reverse('zettelbox:index'), exists))
     except ObjectDoesNotExist:
         yourbox = Box(name=name)
         yourbox.save()
     return HttpResponseRedirect(reverse('zettelbox:box', args=(name,)))
 
-def box(request, box_name):
-    # standard boilerplate
-    try:
-        user = User.objects.get(pk=request.session.get('user_id'))
-        context = { 'username': user.name }
-    except ObjectDoesNotExist:
-        return HttpResponseRedirect('{:s}?redirect={:s}'.format(reverse('zettelbox:login'),reverse('zettelbox:box', args=(box_name,))))
-
-    try:
-        box = Box.objects.get(name=box_name)
-        context['box'] = box
-    except ObjectDoesNotExist:
-        return HttpResponseRedirect(reverse('zettelbox:index'))
-
-    context['papers'] = [ paper for paper in box.paper_set.filter(holder=user) ]
-    players = set()
-    for p in box.paper_set.all():
-        players.add(p.creator.name)
-
-    context['players'] = ', '.join(players)
-    context['paper_count_inside'] = box.paper_set.filter(holder=None).count()
-    context['paper_count'] = box.paper_set.count()
-
-    context['message'] = request.GET.get('message')
-
-    return render(request, 'zettelbox/box.html', context)
-
-def login(request):
-    # standard boilerplate
-    redirectUrl = request.GET.get('redirect')
-    if redirectUrl == None:
-        redirectUrl = reverse('zettelbox:index')
-    try:
-        user = User.objects.get(pk=request.session.get('user_id'))
-        return HttpResponseRedirect(redirectUrl)
-    except ObjectDoesNotExist:
-        context = { 'redirect': redirectUrl }
-        return render(request, 'zettelbox/login.html', context)
-
-def logout(request):
-    if (request.session.get('user_id') != None):
-        try:
-            user = User.objects.get(pk=request.session.get('user_id'))
-            user.delete()
-        except ObjectDoesNotExist:
-            pass
-        del request.session['user_id']
-    return HttpResponseRedirect(reverse('zettelbox:login'))
-
-
-def taufe(request):
-    name = request.POST['name']
-    redirect = request.POST['redirect']
-    single_use_user = User(name=name)
-    single_use_user.save()
-    request.session['user_id'] = single_use_user.id
-    return HttpResponseRedirect(redirect)
-
-def rename(request):
-    name = request.POST['username']
-    source = request.POST['source']
-    try:
-        user = User.objects.get(pk=request.session.get('user_id'))
-    except ObjectDoesNotExist:
-        return HttpResponseRedirect(reverse('zettelbox:login'))
-
-    user.name = name
-    user.save()
-    return HttpResponseRedirect(source)
-
-def addPaper(request, box_name):
-    # standard boilerplate
-    try:
-        user = User.objects.get(pk=request.session.get('user_id'))
-    except ObjectDoesNotExist:
-        return HttpResponseRedirect(reverse('zettelbox:login'))
-
+# enter 5 papers to play with
+def signUp(request, box_name):
     try:
         box = Box.objects.get(name=box_name)
     except ObjectDoesNotExist:
         return HttpResponseRedirect(reverse('zettelbox:index'))
-
-    if not box.open:
-        return HttpResponseRedirect('{:s}?message=Es dürfen keine Zettel mehr geschrieben werden!'.format(reverse('zettelbox:box', args=(box_name,))))
-
-    content = request.POST['content']
-    paper = Paper(box = box, content = content, holder = user, creator = user)
-    paper.save()
-    return HttpResponseRedirect('{:s}?message=Zettel gespeichert!'.format(reverse('zettelbox:box', args=(box_name,))))
-
-def deletePaper(request, box_name, paper_id):
     # standard boilerplate
     try:
         user = User.objects.get(pk=request.session.get('user_id'))
     except ObjectDoesNotExist:
-        return HttpResponseRedirect(reverse('zettelbox:login'))
+        return HttpResponseRedirect(reverse('zettelbox:box', args=(box_name,)))
 
-    try:
-        box = Box.objects.get(name=box_name)
-    except ObjectDoesNotExist:
-        return HttpResponseRedirect(reverse('zettelbox:index'))
+    if box.paper_set.filter(creator=user).count() > 0:
+        return HttpResponseRedirect(reverse('zettelbox:box', args=(box_name,)))
 
-    try:
-        paper = Paper.objects.get(pk=paper_id)
-        paper.delete()
-    except ObjectDoesNotExist:
-        pass
+    for i in [1,2,3,4,5]:
+        p = Paper(content=request.POST['paper{:s}'.format(str(i))], holder=None, creator=user, box=box)
+        p.save()
 
-    return HttpResponseRedirect('{:s}?message=Zettel vernichtet!'.format(reverse('zettelbox:box', args=(box_name,))))
+    return HttpResponseRedirect(reverse('zettelbox:box', args=(box_name,)))
 
+
+
+# Put paper back in the box
 def insertPaper(request, box_name, paper_id):
     # standard boilerplate
     try:
         user = User.objects.get(pk=request.session.get('user_id'))
     except ObjectDoesNotExist:
-        return HttpResponseRedirect(reverse('zettelbox:login'))
+        return HttpResponseRedirect(reverse('zettelbox:box', args=(box_name,)))
 
     try:
         box = Box.objects.get(name=box_name)
@@ -160,35 +105,42 @@ def insertPaper(request, box_name, paper_id):
     try:
         paper = Paper.objects.get(pk=paper_id)
         paper.holder = None
+        paper.current = False
         paper.save()
-        return HttpResponseRedirect('{:s}?message=Zettel in die Box gelegt!'.format(reverse('zettelbox:box', args=(box_name,))))
     except ObjectDoesNotExist:
-        return HttpResponseRedirect('{:s}?message=Zettel scheint verloren gegangen zu sein :/'.format(reverse('zettelbox:box', args=(box_name,))))
+        pass
 
-def insertAll(request, box_name):
+    return HttpResponseRedirect(reverse('zettelbox:box', args=(box_name,)))
+
+# Paper is explained and not current anymore
+def confirmPaper(request, box_name, paper_id):
     # standard boilerplate
     try:
         user = User.objects.get(pk=request.session.get('user_id'))
     except ObjectDoesNotExist:
-        return HttpResponseRedirect(reverse('zettelbox:login'))
+        return HttpResponseRedirect(reverse('zettelbox:box', args=(box_name,)))
 
     try:
         box = Box.objects.get(name=box_name)
     except ObjectDoesNotExist:
         return HttpResponseRedirect(reverse('zettelbox:index'))
 
-    for paper in box.paper_set.filter(holder=user):
-        paper.holder = None
+    try:
+        paper = Paper.objects.get(pk=paper_id)
+        paper.current = False
         paper.save()
+    except ObjectDoesNotExist:
+        pass
 
-    return HttpResponseRedirect('{:s}?message=Alle Zettel zurückgelegt!'.format(reverse('zettelbox:box', args=(box_name,))))
+    return HttpResponseRedirect(reverse('zettelbox:box', args=(box_name,)))
 
+# put all papers back in the box
 def forceInsertAll(request, box_name):
     # standard boilerplate
     try:
         user = User.objects.get(pk=request.session.get('user_id'))
     except ObjectDoesNotExist:
-        return HttpResponseRedirect(reverse('zettelbox:login'))
+        return HttpResponseRedirect(reverse('zettelbox:box', args=(box_name,)))
 
     try:
         box = Box.objects.get(name=box_name)
@@ -197,63 +149,35 @@ def forceInsertAll(request, box_name):
 
     for paper in box.paper_set.all():
         paper.holder = None
+        paper.current = False
         paper.save()
 
-    return HttpResponseRedirect('{:s}?message=Zettel von allen in die Box zurückgesaugt!'.format(reverse('zettelbox:box', args=(box_name,))))
-
-def close(request, box_name):
-    # standard boilerplate
-    try:
-        user = User.objects.get(pk=request.session.get('user_id'))
-    except ObjectDoesNotExist:
-        return HttpResponseRedirect(reverse('zettelbox:login'))
-
-    try:
-        box = Box.objects.get(name=box_name)
-    except ObjectDoesNotExist:
-        return HttpResponseRedirect(reverse('zettelbox:index'))
-
-    box.open = False
-    box.save()
-
-    return HttpResponseRedirect('{:s}?message=Ok, niemand darf mehr neue Zettel schreiben!'.format(reverse('zettelbox:box', args=(box_name,))))
-
-def open(request, box_name):
-    # standard boilerplate
-    try:
-        user = User.objects.get(pk=request.session.get('user_id'))
-    except ObjectDoesNotExist:
-        return HttpResponseRedirect(reverse('zettelbox:login'))
-
-    try:
-        box = Box.objects.get(name=box_name)
-    except ObjectDoesNotExist:
-        return HttpResponseRedirect(reverse('zettelbox:index'))
-
-    box.open = True
-    box.save()
-
-    return HttpResponseRedirect('{:s}?message=Man darf jetzt wieder Zettel schreiben!'.format(reverse('zettelbox:box', args=(box_name,))))
+    return HttpResponseRedirect(reverse('zettelbox:box', args=(box_name,)))
 
 def getRandom(request, box_name):
     # standard boilerplate
     try:
         user = User.objects.get(pk=request.session.get('user_id'))
     except ObjectDoesNotExist:
-        return HttpResponseRedirect(reverse('zettelbox:login'))
+        return HttpResponseRedirect(reverse('zettelbox:box', args=(box_name,)))
 
     try:
         box = Box.objects.get(name=box_name)
     except ObjectDoesNotExist:
         return HttpResponseRedirect(reverse('zettelbox:index'))
 
+    for p in box.paper_set.filter(current=True).all():
+        p.current = False
+        p.save()
+
     papers_in_box = box.paper_set.filter(holder=None)
 
     if papers_in_box.count() < 1:
-        return HttpResponseRedirect('{:s}?message=Es liegen keine Zettel mehr in der Box!'.format(reverse('zettelbox:box', args=(box_name,))))
+        return HttpResponseRedirect(reverse('zettelbox:box', args=(box_name,)))
 
     paper = random.choice(papers_in_box)
     paper.holder = user
+    paper.current = True
     paper.save()
 
     return HttpResponseRedirect(reverse('zettelbox:box', args=(box_name,)))

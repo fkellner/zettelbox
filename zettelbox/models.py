@@ -10,10 +10,10 @@ class Box(models.Model):
         return self.name
 
 class User(models.Model):
-    name = models.CharField(max_length=200)
+    #name = models.CharField(max_length=200)
 
     def __str__(self):
-        return self.name
+        return self.id #self.name
 
 class Paper(models.Model):
     box = models.ForeignKey(Box, on_delete=models.CASCADE)
@@ -23,6 +23,8 @@ class Paper(models.Model):
     holder = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL)
     # who created the paper
     creator = models.ForeignKey(User, on_delete=models.CASCADE, related_name='creator_id')
+    # is this the paper currently being explained
+    current = models.BooleanField(default=False)
 
     def __str__(self):
         return self.content
