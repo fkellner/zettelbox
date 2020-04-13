@@ -35,13 +35,13 @@
     <div class="col-lg m-1">
       <h1>{{ current.content }}</h1>
     </div>
-    <div class="col-6 m-auto">
+    <div class="col m-auto">
       <form action="{% url 'zettelbox:insert_paper' box.name current.id %}" method="post">
         {% csrf_token %}
         <input class="btn btn-sm btn-secondary" type="submit" value="Zurücklegen">
       </form>
     </div>
-    <div class="col-6 m-auto">
+    <div class="col m-auto">
       <form action="{% url 'zettelbox:confirm_paper' box.name current.id %}" method="post">
         {% csrf_token %}
         <input class="btn btn-sm btn-info" type="submit" value="Ok">
@@ -52,7 +52,7 @@
 
   <div class="row mt-3">
   {% for paper in papers %}
-    <div class="col-6 m-1 p-2 border border-rounded">
+    <div class="col-5 m-1 p-2 border border-rounded">
       <p>{{ paper.content }}</p>
       <form action="{% url 'zettelbox:insert_paper' box.name paper.id %}" method="post">
         {% csrf_token %}
