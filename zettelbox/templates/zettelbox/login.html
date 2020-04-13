@@ -12,18 +12,20 @@
 </head>
 <body>
 
-  <div class="container">
+  <div class="container text-center">
 
-  <h2>Sag deinen Mitspielern bitte noch, wie du heißt:</h2>
-
-  {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
-
-  <form action="{% url 'zettelbox:taufe' %}" method="post">
-  {% csrf_token %}
-  <input type="text" name="name" id="name" placeholder="Anonymes Einhorn"><br>
-  <input type="text" name="redirect" hidden="true" value="{{ redirect }}">
-  <input type="submit" value="Namen festlegen">
-  </form>
+  <div class="row mt-3">
+    <div class="col m-1 p-2">
+      <h2>Sag deinen Mitspielern bitte noch, wie du heißt:</h2>
+      {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+      <form action="{% url 'zettelbox:taufe' %}" method="post">
+      {% csrf_token %}
+      <input type="text" name="name" id="name" placeholder="Anonymes Einhorn"><br>
+      <input type="text" name="redirect" hidden="true" value="{{ redirect }}">
+      <input class="btn btn-success" type="submit" value="Namen festlegen">
+      </form>
+    </div>
+  </div>
 
   </div>
 

@@ -11,30 +11,47 @@
 </head>
 <body>
 
-  <div class="container">
+  <div class="container text-center">
 
-    <h1>Hallo und Willkommen im Land der Zettelboxen!</h1>
+    <div class="row mt-3 border-bottom">
+      <div class="col m-1 p-2">
+          <h1>Hallo und Willkommen im Land der Zettelboxen!</h1>
+      </div>
+    </div>
 
-    {% if exists %}<p><strong>{{ exists }} existiert bereits <a href="{% url 'zettelbox:box' exists %}">hier</a></strong></p>{% endif %}
+    {% if exists %}
+    <div class="row mt-3">
+      <div class="col m-1 p-2">
+        <p><strong>{{ exists }} existiert bereits <a href="{% url 'zettelbox:box' exists %}">hier</a></strong></p>
+      </div>
+    </div>
+    {% endif %}
 
-    <form action="{% url 'zettelbox:create' %}" method="post">
-    {% csrf_token %}
-    <input type="text" name="name" id="name" placeholder="Name der Zettelbox"><br>
-    <input type="submit" value="Box Erstellen">
-    </form>
+    <div class="row mt-3">
+      <div class="col m-1 p-2">
+        <form action="{% url 'zettelbox:create' %}" method="post">
+        {% csrf_token %}
+        <input type="text" name="name" id="name" placeholder="Name der Zettelbox"><br>
+        <input class="btn btn-success" type="submit" value="Box Erstellen">
+        </form>
+      </div>
+    </div>
 
-    <footer style="position:fixed;bottom:0;left:0;right:0;text-align:center">
+
+    <div class="row mt-3 border-top">
+      <div class="col m-1">
       <form action="{% url 'zettelbox:rename' %}" method="post">
         {% csrf_token %}
         Die Anderen sehen dich als <input type="text" name="username" id="username" value="{{ username }}">
         <input type="text" name="source" hidden="true" value="{{ request.path_info }}">
-        <input type="submit" value="Name ändern">
+        <input class="btn btn-sm btn-warning" type="submit" value="Name ändern">
       </form>
       <form action="{% url 'zettelbox:logout' %}" method="post">
         {% csrf_token %}
-        <input type="submit" value="Löschen">
+        <input class="btn btn-sm btn-danger" type="submit" value="Löschen">
       </form>
-    </footer>
+      </div>
+    </div>
 
   </div>
 
