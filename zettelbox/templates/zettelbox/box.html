@@ -13,76 +13,101 @@
 
 <div class="container">
 
-  <h1>{{ box.name }}</h1>
-  <p>Mit Zetteln von {{ players }}
-  </p>
-  <p>{{ paper_count_inside }}/{{ paper_count }} Zettel sind drin
-  </p>
-  {% if box.open %}
-  <form action="{% url 'zettelbox:close' box.name %}" method="post">
-    {% csrf_token %}
-    <input type="submit" value="Keine neuen Zettel mehr zulassen">
-  </form>
-  {% endif %}
+  <div class="row">
+    <div class="col">
+      <h1>{{ box.name }}</h1>
+    </div>
+    <div class="col">
+      <p>Mit Zetteln von {{ players }}
+      </p>
+    </div>
+    <div class="col">
+      <p>{{ paper_count_inside }}/{{ paper_count }} Zettel sind drin
+      </p>
+    </div>
+    {% if box.open %}
+    <div class="col">
+    <form action="{% url 'zettelbox:close' box.name %}" method="post">
+      {% csrf_token %}
+      <input class="btn btn-danger" type="submit" value="Keine neuen Zettel mehr zulassen">
+    </form>
+    </div>
+    {% endif %}
+  </div>
 
-  {% if message %}<p><strong>{{ message }}</strong></p>{% endif %}
 
+  {% if message %}<div class="row"><p><strong>{{ message }}</strong></p></div>{% endif %}
+
+  <div class="row">
   <form action="{% url 'zettelbox:random' box.name %}" method="post">
     {% csrf_token %}
-    <input type="submit" value="Zufälligen Zettel ziehen">
+    <input class="btn btn-primary" type="submit" value="Zufälligen Zettel ziehen">
   </form>
-  <ul>
+  </div>
+
+  <div class="row">
   {% for paper in papers %}
-    <li>
+    <div class="col">
       <p>{{ paper.content }}</p>
       <form action="{% url 'zettelbox:insert_paper' box.name paper.id %}" method="post">
         {% csrf_token %}
-        <input type="submit" value="In die Box legen">
+        <input class="btn btn-sm btn-primary" type="submit" value="In die Box legen">
       </form>
       <form action="{% url 'zettelbox:delete_paper' box.name paper.id %}" method="post">
         {% csrf_token %}
-        <input type="submit" value="Vernichten">
+        <input class="btn btn-sm btn-danger"type="submit" value="Vernichten">
       </form>
-    </li>
+    </div>
   {% endfor %}
-  </ul>
   {% if box.open %}
+  <div class="col">
   <form action="{% url 'zettelbox:add_paper' box.name %}" method="post">
     {% csrf_token %}
     <input type="text" name="content" placeholder="Ein Wort">
-    <input type="submit" value="Zettel speichern">
+    <input class="btn btn-success" type="submit" value="Zettel speichern">
   </form>
+  </div>
   {% endif %}
+  </div>
 
-  <form action="{% url 'zettelbox:insert_all' box.name %}" method="post">
-    {% csrf_token %}
-    <input type="submit" value="Alle Zettel in die Box legen">
-  </form>
 
-  <form action="{% url 'zettelbox:force_insert_all' box.name %}" method="post">
-    {% csrf_token %}
-    <input type="submit" value="Allen Mitspieler:innen die Zettel entreißen und zurück in die Box tun.">
-  </form>
+  <div class="row">
+    <div class="col">
+    <form action="{% url 'zettelbox:insert_all' box.name %}" method="post">
+      {% csrf_token %}
+      <input class="btn btn-primary" type="submit" value="Alle Zettel in die Box legen">
+    </form>
+    </div>
 
-  {% if not box.open %}
-  <form action="{% url 'zettelbox:open' box.name %}" method="post">
-    {% csrf_token %}
-    <input type="submit" value="Wieder neue Zettel zulassen">
-  </form>
-  {% endif %}
+    <div class="col">
+    <form action="{% url 'zettelbox:force_insert_all' box.name %}" method="post">
+      {% csrf_token %}
+      <input class="btn btn-danger" type="submit" value="Allen Mitspieler:innen die Zettel entreißen und zurück in die Box tun.">
+    </form>
+    </div>
 
-  <footer style="position:fixed;bottom:0;left:0;right:0;text-align:center">
+    {% if not box.open %}
+    <div class="col">
+    <form action="{% url 'zettelbox:open' box.name %}" method="post">
+      {% csrf_token %}
+      <input class="btn btn-success" type="submit" value="Wieder neue Zettel zulassen">
+    </form>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="row">
     <form action="{% url 'zettelbox:rename' %}" method="post">
       {% csrf_token %}
       Die Anderen sehen dich als <input type="text" name="username" id="username" value="{{ username }}">
       <input type="text" name="source" hidden="true" value="{{ request.path_info }}">
-      <input type="submit" value="Name ändern">
+      <input class="btn btn-sm btn-warning" type="submit" value="Name ändern">
     </form>
     <form action="{% url 'zettelbox:logout' %}" method="post">
       {% csrf_token %}
-      <input type="submit" value="Löschen">
+      <input class="btn btn-sm btn-danger" type="submit" value="Löschen">
     </form>
-  </footer>
+  </div>
 
 </div>
 
